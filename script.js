@@ -32,6 +32,7 @@ async function fetchImages() {
             imgElement.src = image.download_url;
             imgElement.title = `Photo by ${image.author}`;
             imgElement.setAttribute('data-author', image.author);
+            imgElement.setAttribute('data-download-url', image.download_url);
 
             linkElement.appendChild(imgElement);
             imageGrid.appendChild(linkElement);
@@ -67,13 +68,11 @@ window.addEventListener('scroll', () => {
 });
 
 // Modal Open Function
-function openModal(imageUrl, author) {
+function openModal(imageUrl, author, downloadUrl) {
     modal.classList.remove('hidden');
     modalImage.src = imageUrl;
     modalAuthor.textContent = `Author: ${author}`;
-    downloadButton.href = imageUrl;
-    downloadButton.download = `photo-by-${author.replace(/[^a-zA-Z0-9-]/g, "-")}.jpg`;
-    console.log(downloadButton);
+    downloadButton.download = `photo-by-${author}.jpg`; // Set the download attribute with a filename
 }
 
 // Modal Close Function
@@ -94,39 +93,10 @@ imageGrid.addEventListener('click', (e) => {
     if (e.target.tagName === 'IMG') {
         const imageUrl = e.target.src;
         const author = e.target.getAttribute('data-author');
-        openModal(imageUrl, author);
+        const downloadUrl = e.target.getAttribute('data-download-url');
+        openModal(imageUrl, author, downloadUrl);
     }
 });
 
 // Initial Fetch of Images
 fetchImages();
-
-
-function openModal(imageUrl, author) {
-    modal.classList.remove('hidden'); 
-    modalImage.src = imageUrl; 
-    modalAuthor.textContent = `Author: ${author}`; 
-    downloadButton.href = imageUrl; 
-    downloadButton.download = `photo-by-${author.replace(/[^a-zA-Z0-9-]/g, "-")}.jpg`;
-    console.log(downloadButton)
-
-}
-
-function closeModalHandler() {
-    modal.classList.add('hidden'); 
-}
-
-closeModal.addEventListener('click', closeModalHandler);
-modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-        closeModalHandler();
-    }
-});
-
-imageGrid.addEventListener('click', (e) => {
-    if (e.target.tagName === 'IMG') {
-        const imageUrl = e.target.src;
-        const author = e.target.getAttribute('data-author');
-        openModal(imageUrl, author);
-    }
-});
