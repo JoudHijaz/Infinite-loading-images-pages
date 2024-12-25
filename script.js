@@ -1,6 +1,6 @@
 const imageGrid = document.getElementById('image-grid');
 let page = 1;
-const limit = 10;
+const limit = 5;
 let isLoading = false;
 const modal = document.getElementById('image-modal');
 const modalImage = document.getElementById('modal-image');
@@ -9,16 +9,19 @@ const downloadButton = document.getElementById('download-button');
 const closeModal = document.getElementById('close-modal');
 
 async function fetchImages() {
-    if (isLoading) {
-        console.log('Already loading images, skipping fetch...');
-        return;
-    }
-    console.log('Fetching images for page:', page);
+    if (isLoading) return;
     isLoading = true;
 
     try {
+        console.log(`Fetching images for page: ${page}`);
         const response = await fetch(`https://picsum.photos/v2/list?page=${page}&limit=${limit}`);
+        if (!response.ok) throw new Error('Failed to fetch images');
         const images = await response.json();
+
+        if (images.length === 0) {
+            console.log('No more images to fetch.');
+            return; // Stop if no images are returned
+        }
 
         images.forEach((image) => {
             const linkElement = document.createElement('a');
@@ -34,8 +37,8 @@ async function fetchImages() {
             imageGrid.appendChild(linkElement);
         });
 
-        console.log(`Page ${page} images loaded successfully.`);
         page++;
+        console.log(`Page ${page - 1} images loaded successfully.`);
     } catch (error) {
         console.error('Error fetching images:', error);
     } finally {
@@ -44,16 +47,19 @@ async function fetchImages() {
 }
 
 window.addEventListener('scroll', () => {
-    console.log(`Scroll Position: ${window.innerHeight + window.scrollY}`);
-    console.log(`Document Height: ${document.body.offsetHeight}`);
+    const scrollPosition = window.innerHeight + window.scrollY; // Current scroll position
+    const documentHeight = document.documentElement.scrollHeight; // Total scrollable height
 
-    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+    console.log(`Scroll Position: ${scrollPosition}`);
+    console.log(`Document Height: ${documentHeight}`);
+
+    // Check if the user has scrolled near the bottom of the page
+    if (scrollPosition >= documentHeight - 100) {
         console.log('Scroll condition met. Loading more images...');
-        fetchImages();
-    } else {
-        console.log('Scroll condition not met yet.');
+        fetchImages(); // Call fetchImages when condition is met
     }
 });
+
 
 // Initial Fetch
 fetchImages();
@@ -64,7 +70,7 @@ function openModal(imageUrl, author) {
     modalAuthor.textContent = `Author: ${author}`; 
     downloadButton.href = imageUrl; 
     downloadButton.download = `photo-by-${author.replace(/[^a-zA-Z0-9-]/g, "-")}.jpg`;
-    
+    console.log(downloadButton)
 
 }
 
