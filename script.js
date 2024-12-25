@@ -20,7 +20,7 @@ async function fetchImages() {
 
         if (images.length === 0) {
             console.log('No more images to fetch.');
-            return; // Stop if no images are returned
+            return; 
         }
 
         images.forEach((image) => {
@@ -43,24 +43,64 @@ async function fetchImages() {
         console.error('Error fetching images:', error);
     } finally {
         isLoading = false;
+
+        // Automatically fetch more images if the page is not scrollable yet
+        if (window.innerHeight >= document.documentElement.scrollHeight) {
+            console.log('Page not scrollable yet. Fetching more images...');
+            fetchImages();
+        }
     }
 }
 
+// Infinite Scroll Logic
 window.addEventListener('scroll', () => {
-    console.log(`Scroll Position: ${window.innerHeight + window.scrollY}`);
-    console.log(`Document Height: ${document.body.offsetHeight}`);
+    const scrollPosition = window.innerHeight + window.scrollY;
+    const documentHeight = document.documentElement.scrollHeight;
 
-    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+    console.log(`Scroll Position: ${scrollPosition}`);
+    console.log(`Document Height: ${documentHeight}`);
+
+    if (scrollPosition >= documentHeight - 100) {
         console.log('Scroll condition met. Loading more images...');
         fetchImages();
-    } else {
-        console.log('Scroll condition not met yet.');
     }
 });
 
+// Modal Open Function
+function openModal(imageUrl, author) {
+    modal.classList.remove('hidden');
+    modalImage.src = imageUrl;
+    modalAuthor.textContent = `Author: ${author}`;
+    downloadButton.href = imageUrl;
+    downloadButton.download = `photo-by-${author.replace(/[^a-zA-Z0-9-]/g, "-")}.jpg`;
+    console.log(downloadButton);
+}
 
-// Initial Fetch
+// Modal Close Function
+function closeModalHandler() {
+    modal.classList.add('hidden');
+}
+
+// Event Listener for Closing Modal
+closeModal.addEventListener('click', closeModalHandler);
+modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+        closeModalHandler();
+    }
+});
+
+// Event Listener for Image Clicks
+imageGrid.addEventListener('click', (e) => {
+    if (e.target.tagName === 'IMG') {
+        const imageUrl = e.target.src;
+        const author = e.target.getAttribute('data-author');
+        openModal(imageUrl, author);
+    }
+});
+
+// Initial Fetch of Images
 fetchImages();
+
 
 function openModal(imageUrl, author) {
     modal.classList.remove('hidden'); 

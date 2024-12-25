@@ -21,8 +21,7 @@ main {
     grid-template-columns: repeat(4, 1fr);
     gap: 10px;
     width: 100%;
-    min-height: 100vh;
-}
+    }
 
 #image-grid img {
     width: 100%;
