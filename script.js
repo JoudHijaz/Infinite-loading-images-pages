@@ -47,16 +47,14 @@ async function fetchImages() {
 }
 
 window.addEventListener('scroll', () => {
-    const scrollPosition = window.innerHeight + window.scrollY; // Current scroll position
-    const documentHeight = document.documentElement.scrollHeight; // Total scrollable height
+    console.log(`Scroll Position: ${window.innerHeight + window.scrollY}`);
+    console.log(`Document Height: ${document.body.offsetHeight}`);
 
-    console.log(`Scroll Position: ${scrollPosition}`);
-    console.log(`Document Height: ${documentHeight}`);
-
-    // Check if the user has scrolled near the bottom of the page
-    if (scrollPosition >= documentHeight - 100) {
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
         console.log('Scroll condition met. Loading more images...');
-        fetchImages(); // Call fetchImages when condition is met
+        fetchImages();
+    } else {
+        console.log('Scroll condition not met yet.');
     }
 });
 
