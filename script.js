@@ -67,12 +67,22 @@ window.addEventListener('scroll', () => {
     }
 });
 
-// Modal Open Function
 function openModal(imageUrl, author, downloadUrl) {
     modal.classList.remove('hidden');
     modalImage.src = imageUrl;
     modalAuthor.textContent = `Author: ${author}`;
-    downloadButton.download = `photo-by-${author}.jpg`; // Set the download attribute with a filename
+
+    // Fetch the image as a Blob and set it for download
+    fetch(downloadUrl)
+        .then((response) => response.blob())
+        .then((blob) => {
+            const blobUrl = URL.createObjectURL(blob);
+            downloadButton.href = blobUrl; // Set the href to the Blob URL
+            downloadButton.download = `photo-by-${author.replace(/[^a-zA-Z0-9]/g, "-")}.jpg`; // Set the download filename
+        })
+        .catch((error) => {
+            console.error('Error creating download link:', error);
+        });
 }
 
 // Modal Close Function
