@@ -7,13 +7,11 @@ const modalImage = document.getElementById('modal-image');
 const modalAuthor = document.getElementById('modal-author');
 const downloadButton = document.getElementById('download-button');
 const closeModal = document.getElementById('close-modal');
+const sentinel = document.createElement('div'); // Sentinel element for Intersection Observer
+imageGrid.appendChild(sentinel);
 
-// Fetch images from the API
 async function fetchImages() {
     if (isLoading) return;
-
-    // Disable scroll listener while fetching
-    disableScrollListener();
     isLoading = true;
 
     try {
@@ -39,7 +37,7 @@ async function fetchImages() {
             imgElement.setAttribute('data-download-url', image.download_url);
 
             linkElement.appendChild(imgElement);
-            imageGrid.appendChild(linkElement);
+            imageGrid.insertBefore(linkElement, sentinel);
         });
 
         page++;
@@ -48,43 +46,28 @@ async function fetchImages() {
         console.error('Error fetching images:', error);
     } finally {
         isLoading = false;
+    }
+}
 
-        // Re-enable the scroll listener after fetching
-        enableScrollListener();
-
-        // Automatically fetch more images if the page is not scrollable yet
-        if (window.innerHeight >= document.documentElement.scrollHeight) {
-            console.log('Page not scrollable yet. Fetching more images...');
+// Intersection Observer callback
+function onIntersection(entries) {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            console.log('Sentinel is in view. Loading more images...');
             fetchImages();
         }
-    }
+    });
 }
 
-// Scroll logic with listener management
-function handleScroll() {
-    const scrollPosition = window.innerHeight + window.scrollY;
-    const documentHeight = document.documentElement.scrollHeight;
+// Create an Intersection Observer
+const observer = new IntersectionObserver(onIntersection, {
+    root: null,
+    rootMargin: '0px',
+    threshold: 1.0
+});
 
-    console.log(`Scroll Position: ${scrollPosition}`);
-    console.log(`Document Height: ${documentHeight}`);
-
-    if (scrollPosition >= documentHeight - 100) {
-        console.log('Scroll condition met. Loading more images...');
-        fetchImages();
-    }
-}
-
-// Enable scroll listener
-function enableScrollListener() {
-    window.addEventListener('scroll', handleScroll);
-    console.debug('Scroll listener enabled.');
-}
-
-// Disable scroll listener
-function disableScrollListener() {
-    window.removeEventListener('scroll', handleScroll);
-    console.debug('Scroll listener disabled.');
-}
+// Observe the sentinel element
+observer.observe(sentinel);
 
 // Modal functionality
 function openModal(imageUrl, author, downloadUrl) {
@@ -130,4 +113,3 @@ imageGrid.addEventListener('click', (e) => {
 
 // Initial Fetch of Images
 fetchImages();
-enableScrollListener(); // Enable scroll listener initially
