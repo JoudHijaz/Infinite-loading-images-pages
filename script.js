@@ -14,8 +14,8 @@ async function fetchImages() {
         return;
     }
 
+    isLoading = true; // Block further fetches
     console.debug('Fetch initiated.');
-    isLoading = true;
 
     try {
         console.log(`Fetching images for page: ${page}`);
@@ -53,30 +53,36 @@ async function fetchImages() {
     } catch (error) {
         console.error('Error fetching images:', error);
     } finally {
-        isLoading = false;
+        isLoading = false; // Unlock fetches after completion
         console.debug('Fetch completed. isLoading reset to false.');
 
-        // Automatically fetch more images if the page is not scrollable yet
-        if (window.innerHeight >= document.documentElement.scrollHeight) {
-            console.log('Page not scrollable yet. Fetching more images...');
-            fetchImages();
-        }
+        // Ensure content is scrollable; fetch more images if needed
+        setTimeout(() => {
+            if (window.innerHeight >= document.documentElement.scrollHeight) {
+                console.log('Page not scrollable yet. Fetching more images...');
+                fetchImages();
+            }
+        }, 100); // Small delay for rendering
     }
 }
 
-// Infinite Scroll Logic
+// Debounced Scroll Event
+let debounceTimer;
 window.addEventListener('scroll', () => {
-    const scrollPosition = window.innerHeight + window.scrollY;
-    const documentHeight = document.documentElement.scrollHeight;
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+        const scrollPosition = window.innerHeight + window.scrollY;
+        const documentHeight = document.documentElement.scrollHeight;
 
-    console.debug(`Scroll event detected. Scroll Position: ${scrollPosition}, Document Height: ${documentHeight}`);
+        console.debug(`Scroll event detected. Scroll Position: ${scrollPosition}, Document Height: ${documentHeight}`);
 
-    if (scrollPosition >= documentHeight - 100 && !isLoading) {
-        console.info('Scroll condition met. Loading more images...');
-        fetchImages();
-    } else {
-        console.debug('Scroll condition not met. No fetch triggered.');
-    }
+        if (scrollPosition >= documentHeight - 100 && !isLoading) {
+            console.info('Scroll condition met. Loading more images...');
+            fetchImages();
+        } else {
+            console.debug('Scroll condition not met. No fetch triggered.');
+        }
+    }, 150); // Adjust debounce time as needed
 });
 
 function openModal(imageUrl, author, downloadUrl) {
