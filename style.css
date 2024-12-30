@@ -3,6 +3,7 @@ html, body {
     margin: 0;
 }
 
+
 header {
     text-align: center;
     background: #333;
@@ -108,11 +109,11 @@ main {
     cursor: pointer;
 }
 
-@media (max-width: 767px) {
+@media screen and (max-width: 767px) {
     #image-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-    .modal-content{
+  .modal-content{
         flex-direction: column;
     }
 }
