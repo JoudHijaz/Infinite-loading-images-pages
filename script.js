@@ -46,13 +46,18 @@ async function fetchImages() {
         console.error('Error fetching images:', error);
     } finally {
         isLoading = false;
+
+        if (document.documentElement.scrollHeight <= window.innerHeight) {
+            console.log('Page not filled yet. Fetching more images...');
+            fetchImages();
+        }
     }
 }
 
 // Intersection Observer callback
 function onIntersection(entries) {
     entries.forEach(entry => {
-        if (entry.isIntersecting) {
+        if (entry.isIntersecting && !isLoading) {
             console.log('Sentinel is in view. Loading more images...');
             fetchImages();
         }
